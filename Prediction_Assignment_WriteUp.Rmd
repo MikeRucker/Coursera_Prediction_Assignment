@@ -1,0 +1,133 @@
+---
+title: "Prediction Assignment Write-up for Couresa"
+author: "Mike Rucker, Ph.D"
+date: "October 9, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+
+This project report is the culmination of the Coursera Practical Machine Learning course. What is contained within is an attempt to predict how participants performed exercises from the “classe” variable in a data set that was presented in the Qualitative Activity Recognition of Weight Lifting Exercises study authored by Velloso, Bulling, Gellersen, Ugulino, and Fuks (more information is available here: http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har). The participants were asked to perform barbell lifts correctly and incorrectly in 5 different ways. In this report I show how the prediction model was built, how it was cross validated, as well as explain some of the choices that were made during the process. The results section is output of twenty different test case predictions.
+
+## Needed R Packages
+
+Here are the R packages that were used. If you need to download them you can use the __install.packages__ function.
+
+```{r, cache=TRUE, message=FALSE}
+# Install and load the necessary packages
+library(caret)
+library(kernlab)
+library(randomForest)
+library(corrplot)
+library(rpart)
+library(rpart.plot)
+library(e1071)
+set.seed(32343)
+```
+
+## Needed Data for Project
+
+Those looking to reproduce my results can find the data from the following links:
+Training data: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+Testing data: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+
+```{r, cache=TRUE}
+# Download, Clean, and Split Data
+if (!file.exists("data")) {dir.create("data")}
+PMLTrainRawURL <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+PMLTrainRawFile <- "./data/pml-training.csv"
+PMLTestRawURL <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+PMLTestRawFile <- "./data/pml-testing.csv"
+download.file(PMLTrainRawURL, destfile = PMLTrainRawFile)
+download.file(PMLTrainRawURL, destfile = PMLTestRawFile)
+dateDownloaded <- date()
+data_training <- read.csv("./data/pml-training.csv", na.strings= c("NA",""," "))
+
+# Remove NAs and Columns Not Needed for Analysis from the Training Data
+data_training_NAs <- apply(data_training, 2, function(x) {sum(is.na(x))})
+data_training_clean <- data_training[,which(data_training_NAs == 0)]
+data_training_clean <- data_training_clean[8:length(data_training_clean)]
+
+# Now Apply Same Treatment to Remaining Testing Data
+data_test <- read.csv("./data/pml-testing.csv", na.strings= c("NA",""," "))
+data_test_NAs <- apply(data_test, 2, function(x) {sum(is.na(x))})
+data_test_clean <- data_test[,which(data_test_NAs == 0)]
+data_test_clean <- data_test_clean[8:length(data_test_clean)]
+
+# Split Data
+inTrain <- createDataPartition(y = data_training_clean$classe, p = 0.7, list = FALSE)
+training <- data_training_clean[inTrain, ]
+crossval <- data_training_clean[-inTrain, ]
+
+```
+
+##Correlation Matrix
+
+Here a correlation matrix is creaeted using the training data.
+
+```{r, cache=TRUE}
+# Plot Correlation Matrix Using Training Data
+correlMatrix <- cor(training[, -length(training)])
+corrplot(correlMatrix, order = "FPC", method = "circle", type = "lower", tl.cex = 0.8,  tl.col = rgb(0, 0, 0))
+```
+
+## Model Creation and Cross Validation
+
+For model creation I have used the randomForest function, which, "implements Breiman's random forest algorithm (based on Breiman and Cutler's original Fortran code) for classification and regression. It can also be used in unsupervised mode for assessing proximities among data points. (source: https://www.rdocumentation.org/packages/randomForest/versions/4.6-12/topics/randomForest)
+
+```{r, cache=TRUE}
+# A Model is Created to Predict the Classe Variable and then the Model is Cross-validated
+model <- randomForest(classe ~ ., data = training)
+predictCrossVal <- predict(model, crossval)
+cv_summary <- confusionMatrix(crossval$classe, predictCrossVal)
+cv_summary
+```
+
+## Prediction Results 
+
+The cleaned test data is now used for prediction for each of the 20 observations. 
+
+```{r, cache=TRUE, results=FALSE}
+predictTest <- predict(model, data_test_clean)
+predictTest
+```
+
+The resulting output is:
+
+<style type="text/css">
+.table {
+
+    width: 20%;
+
+}
+</style>
+problem_id | predicted
+---------- | ---------
+1 | B
+2 | A
+3 | B
+4 | A
+5 | A
+6 | E
+7 | D
+8 | B
+9 | A
+10 | A
+11 | B
+12 | C
+13 | B
+14 | A
+15 | E
+16 | E
+17 | A
+18 | B
+19 | B
+20 | B
+
+## Conclusions
+The model appears to work, as the output has been validated against the course's grader set. It appears using ML could be helpful here in identifying mistakes in weightlifting.
