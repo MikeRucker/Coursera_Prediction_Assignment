@@ -74,7 +74,7 @@ corrplot(correlMatrix, order = "FPC", method = "circle", type = "lower", tl.cex 
 
 ## Model Creation and Cross Validation
 
-For model creation I have used the randomForest function, which, "implements Breiman's random forest algorithm (based on Breiman and Cutler's original Fortran code) for classification and regression. It can also be used in unsupervised mode for assessing proximities among data points. (source: https://www.rdocumentation.org/packages/randomForest/versions/4.6-12/topics/randomForest)
+For model creation I have used the randomForest function, which, "implements Breiman's random forest algorithm (based on Breiman and Cutler's original Fortran code) for classification and regression. It can also be used in unsupervised mode for assessing proximities among data points (source: https://www.rdocumentation.org/packages/randomForest/versions/4.6-12/topics/randomForest). __Please Note:__ The estimate sample error and cross validation output it available in the HTML document. 
 
 ```{r, cache=TRUE}
 # A Model is Created to Predict the Classe Variable and then the Model is Cross-validated
@@ -95,13 +95,6 @@ predictTest
 
 The resulting output is:
 
-<style type="text/css">
-.table {
-
-    width: 20%;
-
-}
-</style>
 problem_id | predicted
 ---------- | ---------
 1 | B
