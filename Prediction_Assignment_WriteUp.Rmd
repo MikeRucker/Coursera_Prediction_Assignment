@@ -5,10 +5,6 @@ date: "October 9, 2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ## Overview
 
 This project report is the culmination of the Coursera Practical Machine Learning course. What is contained within is an attempt to predict how participants performed exercises from the “classe” variable in a data set that was presented in the Qualitative Activity Recognition of Weight Lifting Exercises study authored by Velloso, Bulling, Gellersen, Ugulino, and Fuks (more information is available here: http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har). The participants were asked to perform barbell lifts correctly and incorrectly in 5 different ways. In this report I show how the prediction model was built, how it was cross validated, as well as explain some of the choices that were made during the process. The results section is output of twenty different test case predictions.
@@ -66,9 +62,9 @@ crossval <- data_training_clean[-inTrain, ]
 
 ```
 
-##Correlation Matrix
+## Correlation Matrix
 
-Here a correlation matrix is creaeted using the training data.
+Here a correlation matrix is created using the training data.
 
 ```{r, cache=TRUE}
 # Plot Correlation Matrix Using Training Data
